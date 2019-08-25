@@ -1,0 +1,14 @@
+﻿<Window x:Class="ClientsManager.EnterNameWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:ClientsManager"
+        mc:Ignorable="d"
+        Title="Введите название" Height="152.727" Width="244.727">
+    <Grid>
+        <Button IsDefault="True" Content="Создать поле" HorizontalAlignment="Left" Margin="76,80,0,0" VerticalAlignment="Top" Width="147" Click="Button_Click" />
+        <TextBox x:Name="nameTxt" HorizontalAlignment="Left" Height="23" Margin="10,19,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="213"/>
+
+    </Grid>
+</Window>
