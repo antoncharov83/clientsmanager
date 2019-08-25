@@ -83,6 +83,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="NumberRow.cs" />
     <Compile Include="Transliteration.cs" />
     <Page Include="EnterNameWindow.xaml">
       <SubType>Designer</SubType>

@@ -8,23 +8,25 @@
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
         TextElement.Foreground="{DynamicResource MaterialDesignBody}"
      TextElement.FontWeight="Regular"
+     ResizeMode="NoResize"
      TextElement.FontSize="13"
      TextOptions.TextFormattingMode="Ideal"
      TextOptions.TextRenderingMode="Auto"
      Background="{DynamicResource MaterialDesignPaper}"
      FontFamily="{DynamicResource MaterialDesignFont}"
         mc:Ignorable="d"
-        Title="Учёт клиентов" Height="750.225" Width="800"
+        Title="Учёт клиентов" Height="750.225" Width="891"
         WindowStartupLocation="CenterScreen" Closing="Window_Closing">
 
     <Grid Margin="0,0,0,-1">
         <Button x:Name="newClientBtn" Content="Новый" HorizontalAlignment="Left" Margin="10,53,0,0" VerticalAlignment="Top" Width="95" Click="NewClientBtn_Click"/>
-        <Button x:Name="delClientBtn" Content="Удалить" HorizontalAlignment="Left" Margin="115,53,0,0" VerticalAlignment="Top" Width="95" Click="DelClientBtn_Click"/>
+        <Button x:Name="delClientBtn" Content="Удалить" HorizontalAlignment="Left" Margin="190,53,0,0" VerticalAlignment="Top" Width="95" Click="DelClientBtn_Click"/>
 
-        <Label Content="Даты заседаний" HorizontalAlignment="Left" Margin="231,433,0,0" VerticalAlignment="Top" RenderTransformOrigin="0.467,1.846" FontFamily="Brush Script MT" Foreground="#DDBB3030" FontWeight="Bold"/>
-        <DataGrid HeadersVisibility="None" VerticalScrollBarVisibility="Visible" HorizontalScrollBarVisibility="Visible" Name ="dgDataClient" CanUserAddRows="False" IsReadOnly="True" CanUserDeleteRows="False" AutoGenerateColumns="False" HorizontalAlignment="Stretch" Height="338" Margin="231,95,21,0" VerticalAlignment="Top" CellEditEnding="DgClients_CellEditEnding" >
+        <Label Content="Даты заседаний" HorizontalAlignment="Left" Margin="304,433,0,0" VerticalAlignment="Top" RenderTransformOrigin="0.467,1.846" FontFamily="Brush Script MT" Foreground="#DDBB3030" FontWeight="Bold"/>
+        <DataGrid HeadersVisibility="None" VerticalScrollBarVisibility="Visible" HorizontalScrollBarVisibility="Visible" Name ="dgDataClient" CanUserAddRows="False" IsReadOnly="True" CanUserDeleteRows="False" AutoGenerateColumns="False" HorizontalAlignment="Stretch" Height="338" Margin="304,95,21,0" VerticalAlignment="Top" CellEditEnding="DgClients_CellEditEnding" >
             <DataGrid.Columns>
-                <DataGridTextColumn Header="" Binding="{Binding Header}" CanUserSort="False" IsReadOnly="True" Foreground="#FFB83838" FontWeight="Bold"/>
+                <DataGridTextColumn Header="" Binding="{Binding Header}" CanUserSort="False" IsReadOnly="True" Foreground="#FFB83838" FontWeight="Bold">
+                </DataGridTextColumn>
                 <DataGridTextColumn Header="" Binding="{Binding Value}" CanUserSort="False"/>
             </DataGrid.Columns>
         </DataGrid>
@@ -34,7 +36,7 @@
             </MenuItem>
             <MenuItem x:Name="exitItem" Header="Выход" Click="exitItem_Click" ></MenuItem>
         </Menu>
-        <DataGrid VerticalScrollBarVisibility="Auto" ColumnWidth="*" x:Name="dgDates" CanUserAddRows="True" AutoGenerateColumns="False" HorizontalAlignment="Left" Height="194" Margin="231,464,0,0" VerticalAlignment="Top" Width="200" CellEditEnding="DgDates_CellEditEnding" CommandManager.PreviewCanExecute="Grid_PreviewCanExecute">
+        <DataGrid VerticalScrollBarVisibility="Auto" ColumnWidth="*" x:Name="dgDates" CanUserAddRows="True" AutoGenerateColumns="False" HorizontalAlignment="Left" Height="194" Margin="304,464,0,0" VerticalAlignment="Top" Width="200" CellEditEnding="DgDates_CellEditEnding" CommandManager.PreviewCanExecute="Grid_PreviewCanExecute">
             <DataGrid.Resources>
                 <local:DateFormat x:Key="conv"/>
             </DataGrid.Resources>
@@ -53,13 +55,19 @@
                 </DataGridTemplateColumn>
             </DataGrid.Columns>
         </DataGrid>
-        <DataGrid VerticalScrollBarVisibility="Auto" ColumnWidth="*" x:Name="dgClients" HorizontalAlignment="Left" Height="459" Margin="10,90,0,0" VerticalAlignment="Top" Width="200" AutoGenerateColumns="False" CanUserAddRows="False" SelectionChanged="ClientsList_SelectionChanged">
+        <DataGrid VerticalScrollBarVisibility="Auto" ColumnWidth="*" x:Name="dgClients" HorizontalAlignment="Left" Height="459" Margin="10,90,0,0" VerticalAlignment="Top" Width="275" AutoGenerateColumns="False" CanUserAddRows="False" SelectionChanged="ClientsList_SelectionChanged">
+            <DataGrid.Resources>
+                <local:NumberRow x:Key="NumberRow"/>
+            </DataGrid.Resources>
             <DataGrid.Columns>
+                <DataGridTextColumn Header="№" Width="50"
+                                    Binding="{Binding Converter={StaticResource NumberRow}, Mode=OneWay,
+                    RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type DataGridRow}}}" ClipboardContentBinding="{x:Null}"/>
                 <DataGridTextColumn Visibility="Hidden" Binding="{Binding id}" />
                 <DataGridTextColumn Header="Клиент" Binding="{Binding name}" IsReadOnly="True"/>
             </DataGrid.Columns>
         </DataGrid>
-        <DataGrid VerticalScrollBarVisibility="Auto" ColumnWidth="*" x:Name="dgFiles" HorizontalAlignment="Left" Height="157" Margin="457,501,0,0" VerticalAlignment="Top" Width="325" AutoGenerateColumns="False" CanUserAddRows="False" CommandManager.PreviewCanExecute="DgFiles_PreviewCanExecute" MouseDoubleClick="DgFiles_MouseDoubleClick">
+        <DataGrid VerticalScrollBarVisibility="Auto" ColumnWidth="*" x:Name="dgFiles" HorizontalAlignment="Left" Height="157" Margin="537,501,0,0" VerticalAlignment="Top" Width="325" AutoGenerateColumns="False" CanUserAddRows="False" CommandManager.PreviewCanExecute="DgFiles_PreviewCanExecute" MouseDoubleClick="DgFiles_MouseDoubleClick">
             <DataGrid.Columns>
                 <DataGridTextColumn Visibility="Hidden" Binding="{Binding id}" />
                 <DataGridTextColumn Binding="{Binding filename}" Visibility="Hidden"/>
@@ -67,15 +75,20 @@
             </DataGrid.Columns>
         </DataGrid>
 
-        <Button x:Name="addFileBtn" Content="Добавить файл" HorizontalAlignment="Left" Margin="457,464,0,0" VerticalAlignment="Top" Width="142" Click="AddFileBtn_Click"/>
-        <Button x:Name="findBtn" Content="Найти" HorizontalAlignment="Left" Margin="68,603,0,0" VerticalAlignment="Top" Width="85" Click="FindBtn_Click"/>
-        <TextBox x:Name="findTxt" HorizontalAlignment="Left" Height="23" Margin="10,563,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="200" RenderTransformOrigin="0.505,-0.913"/>
-        <Button Visibility="Hidden" x:Name="cancelFindBtn" Content="Отмена" HorizontalAlignment="Left" Margin="68,640,0,0" VerticalAlignment="Top" Width="85" Click="CancelFindBtn_Click"/>
+        <Button x:Name="addFileBtn" Content="Добавить файл" HorizontalAlignment="Left" Margin="537,464,0,0" VerticalAlignment="Top" Width="142" Click="AddFileBtn_Click"/>
+        <Button x:Name="findBtn" Content="Найти" HorizontalAlignment="Left" Margin="10,603,0,0" VerticalAlignment="Top" Width="85" Click="FindBtn_Click" RenderTransformOrigin="-0.424,0.469"/>
+        <TextBox x:Name="findTxt" HorizontalAlignment="Left" Height="23" Margin="10,563,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="275" RenderTransformOrigin="0.505,-0.913"/>
+        <Button Visibility="Hidden" x:Name="cancelFindBtn" Content="Отмена" HorizontalAlignment="Left" Margin="125,603,0,0" VerticalAlignment="Top" Width="85" Click="CancelFindBtn_Click"/>
         <StatusBar HorizontalAlignment="Right" Height="24" Margin="0,686,0,0" VerticalAlignment="Top" Width="792">
-            <TextBlock x:Name="lblInfo" TextWrapping="Wrap" Text="sdsd" Margin="10,0,0,0" Width="26"/>
+            <TextBlock x:Name="lblInfo" TextWrapping="Wrap" Text="" Margin="10,0,0,0" />
         </StatusBar>
-        <Button x:Name="onOffEditBtn" Content="Режим редактирования: ВЫКЛ" HorizontalAlignment="Left" Margin="523,53,0,0" VerticalAlignment="Top" Width="259" Click="OnOffEditBtn_Click"/>
-        <Button x:Name="addColumn" Content="Добавить поле" HorizontalAlignment="Left" Margin="231,53,0,0" VerticalAlignment="Top" Width="134" Click="AddColumn_Click"/>
+        <Button x:Name="onOffEditBtn" Content="Режим редактирования: ВЫКЛ" HorizontalAlignment="Left" Margin="603,53,0,0" VerticalAlignment="Top" Width="259" Click="OnOffEditBtn_Click" RenderTransformOrigin="0.591,0.375"/>
+        <Button x:Name="addColumn" Content="Добавить поле" HorizontalAlignment="Left" Margin="304,53,0,0" VerticalAlignment="Top" Width="134" Click="AddColumn_Click"/>
+        <CheckBox Visibility="Hidden" x:Name="is_closed" Content=" ДЕЛО ЗАКРЫТО" HorizontalAlignment="Left" Margin="742,438,0,0" VerticalAlignment="Top" Click="Закрыто_Click" RenderTransformOrigin="2.306,4.444"/>
+        <CheckBox x:Name="findOpen" Content="В работе" HorizontalAlignment="Left" Margin="10,663,0,0" VerticalAlignment="Top" Click="FindOpen_Click"/>
+        <CheckBox x:Name="findClosed" Content="Закрыты" HorizontalAlignment="Left" Margin="115,663,0,0" VerticalAlignment="Top" Click="FindClosed_Click"/>
+        <Label Content="Искать дела которые -" HorizontalAlignment="Left" Margin="27,635,0,0" VerticalAlignment="Top" Height="28"/>
+        <Button x:Name="delColumn" Content="Удалить поле" HorizontalAlignment="Left" Margin="443,53,0,0" VerticalAlignment="Top" Width="134" Click="DelColumn_Click"/>
     </Grid>
 
 </Window>

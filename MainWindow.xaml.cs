@@ -90,7 +90,8 @@ namespace ClientsManager
                     [court] char(255) NOT NULL,
                     [number] char(50) NOT NULL,
                     [lawer] char(255) NOT NULL,
-                    [result] char(255) NOT NULL
+                    [result] char(255) NOT NULL,
+                    [closed] integer default 0
                     );";
                     command.CommandType = System.Data.CommandType.Text;
                     command.ExecuteNonQuery();
@@ -293,8 +294,8 @@ namespace ClientsManager
             string newData = (e.EditingElement as TextBox).Text;
             //DataTable pivotTable = (dgDataClient.ItemsSource as DataView).Table;
             int selected_cell = dgDataClient.SelectedIndex;
-            oldData = table.Rows[0][e.Column.DisplayIndex + 1].ToString();
-            table.Rows[0][e.Column.DisplayIndex + 1] = newData;
+            oldData = table.Rows[0][selected_cell + 1].ToString();
+            table.Rows[0][selected_cell + 1] = newData;
 
             string dbPath = Properties.Settings.Default.main_directory + dbName;
 
@@ -364,6 +365,13 @@ namespace ClientsManager
                 table = new DataTable();
                 table.Load(reader);
 
+                if ((long)table.Rows[0][8] == 1)
+                    is_closed.IsChecked = true;
+                else
+                    is_closed.IsChecked = false;
+
+                is_closed.Visibility = Visibility.Visible;
+
                 DataTable pivotTable = new DataTable("pivotDataClient");
                 pivotTable.Columns.Add(new DataColumn("Header", System.Type.GetType("System.String")));
                 pivotTable.Columns.Add(new DataColumn("Value", System.Type.GetType("System.String")));
@@ -379,7 +387,8 @@ namespace ClientsManager
                         case 5: row["Header"] = i.ToString() + ". Номер"; break;
                         case 6: row["Header"] = i.ToString() + ". Адвокат"; break;
                         case 7: row["Header"] = i.ToString() + ". Результат"; break;
-                        default: row["Header"] = i.ToString() + ". " + Transliteration.Back(table.Columns[i].ColumnName); break;
+                        case 8: continue;
+                        default: row["Header"] = (i - 1).ToString() + ". " + Transliteration.Back(table.Columns[i].ColumnName); break;
                     }
                     
                     row["Value"] = table.Rows[0][i];
@@ -575,6 +584,11 @@ namespace ClientsManager
             if (findTxt.Text != "")
             {                               
                 dataView.RowFilter = "name like '%" + findTxt.Text + "%'";
+                if (findOpen.IsChecked == true)
+                    dataView.RowFilter += " and closed = 0";
+                if (findClosed.IsChecked == true)
+                    dataView.RowFilter += " and closed = 1";
+
                 if (dataView.Count > 0)
                 {
                     dgClients.SelectedIndex = 0;
@@ -598,6 +612,7 @@ namespace ClientsManager
             dgDates.ItemsSource = null;
             dgFiles.ItemsSource = null;
             cancelFindBtn.Visibility = Visibility.Hidden;
+            is_closed.Visibility = Visibility.Hidden;
         }
 
         private void OnOffEditBtn_Click(object sender, RoutedEventArgs e)
@@ -620,7 +635,7 @@ namespace ClientsManager
             if (enterNameWindow.ShowDialog() == true)
             {
                 string columnName = Transliteration.Front(enterNameWindow.result);
-                SQLiteCommand command = new SQLiteCommand("ALTER TABLE clients ADD COLUMN " + columnName + " TEXT", conn);
+                SQLiteCommand command = new SQLiteCommand("ALTER TABLE clients ADD COLUMN [" + columnName + "] TEXT", conn);
                 try
                 {
                     command.ExecuteNonQuery();
@@ -644,6 +659,88 @@ namespace ClientsManager
                     MessageBox.Show("Ошибка - " + ex.Message,"Ошибка");
                 }
             }
+        }
+
+        private void Закрыто_Click(object sender, RoutedEventArgs e)
+        {
+            if (is_closed.IsChecked == true)
+                table.Rows[0][8] = 1;
+            else
+                table.Rows[0][8] = 0;
+            adapter.Update(table);
+        }
+
+        private void FindOpen_Click(object sender, RoutedEventArgs e)
+        {
+            if (findOpen.IsChecked == true)
+                findClosed.IsChecked = false;
+        }
+
+        private void FindClosed_Click(object sender, RoutedEventArgs e)
+        {
+            if (findClosed.IsChecked == true)
+                findOpen.IsChecked = false;
+        }
+
+        private void DelColumn_Click(object sender, RoutedEventArgs e)
+        {
+            string selected;
+
+            if (dgDataClient.SelectedIndex > 6)
+                selected = table.Columns[dgDataClient.SelectedIndex + 2].ColumnName;
+            else
+            {
+                MessageBox.Show("Удалить можно только поля созданные пользователем", "Предупреждение");
+                return;
+            }
+
+            if (MessageBox.Show(String.Format("Вы хотите удалить {0}", selected), "Подтверждение", MessageBoxButton.OKCancel) == MessageBoxResult.OK) {
+                using (SQLiteCommand command = new SQLiteCommand(conn))
+                {
+                    command.CommandText = @"CREATE TABLE [new_clients] (
+                    [id] integer PRIMARY KEY AUTOINCREMENT NOT NULL,
+                    [name] char(255) NOT NULL,
+                    [contacts] char(255) NOT NULL,
+                    [status] char(255) NOT NULL,
+                    [court] char(255) NOT NULL,
+                    [number] char(50) NOT NULL,
+                    [lawer] char(255) NOT NULL,
+                    [result] char(255) NOT NULL,
+                    [closed] integer default 0
+                    );";
+                    command.CommandType = CommandType.Text;
+                    command.ExecuteNonQuery();
+
+                    for (int i = 9; i < table.Columns.Count; ++i) 
+                        if (i != dgDataClient.SelectedIndex + 2) { 
+                            command.CommandText = @"ALTER TABLE [new_clients] ADD COLUMN [" + table.Columns[i].ColumnName + "] TEXT";
+                            command.ExecuteNonQuery();
+                        }
+
+                    command.CommandText = @"INSERT INTO new_clients SELECT id, name, contacts, status, court, number, lawer, result, closed";
+
+                    for (int i = 9; i < table.Columns.Count; ++i)
+                        if (i != dgDataClient.SelectedIndex + 2) {
+                            command.CommandText += ", [" + table.Columns[i].ColumnName + "]";
+                        }
+                    command.CommandText += " FROM clients";
+                    command.ExecuteNonQuery();
+
+                    command.CommandText = "DROP TABLE IF EXISTS clients";
+                    command.ExecuteNonQuery();
+
+                    command.CommandText = "ALTER TABLE new_clients RENAME TO clients";
+                    command.ExecuteNonQuery();
+                }
+
+                int selected_index = dgClients.SelectedIndex;
+
+                doConnection();
+                refreshClientsList();
+
+                dgClients.SelectedIndex = selected_index;
+            }
+
         }
     }
 }
